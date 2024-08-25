@@ -1,0 +1,22 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+# TypeScript output
+dist/
+
+# Optional npm cache directory
+.npm
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env
+
+# VS Code directories
+.vscode/
