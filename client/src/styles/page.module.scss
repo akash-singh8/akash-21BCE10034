@@ -6,3 +6,12 @@
   padding: 1.5rem;
   min-height: 100vh;
 }
+
+.footer {
+  word-spacing: 2.5px;
+
+  a {
+    color: rgb(var(--primary-text-rgb));
+    font-weight: 600;
+  }
+}
