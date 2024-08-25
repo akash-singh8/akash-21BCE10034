@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Websocket server for checkmate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/akash-singh8/akash-21BCE10034"
+  },
+  "keywords": [
+    "chess-like game",
+    "multiplayer"
+  ],
+  "author": "Akash Singh",
+  "license": "MIT"
+}
