@@ -73,7 +73,14 @@ const Board = () => {
       // 0th value represent Forward, 1->Backward, 2->Left, 3->right
 
       const validMove = (command: string) => {
-        const { isValid } = isValidMove(character, command, row, col, board);
+        const { isValid } = isValidMove(
+          player,
+          character,
+          command,
+          row,
+          col,
+          board
+        );
 
         return isValid;
       };
@@ -102,6 +109,7 @@ const Board = () => {
 
     const character = selectedCharacter.split("-")[1];
     const { isValid, row, col } = isValidMove(
+      player,
       character,
       command,
       position[0],
