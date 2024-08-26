@@ -9,6 +9,7 @@ export const wsConnectionHandler = (ws: WebSocket) => {
   const currPlayer = playerA ? (playerB ? "Spectator" : "B") : "A";
 
   ws.send(JSON.stringify({ player: currPlayer }));
+  if (currPlayer === "B") playerA?.send(JSON.stringify({ player: currPlayer }));
 
   // todo: reconnect the player to the game on come back
 
@@ -46,7 +47,7 @@ const handleMessage = (ws: WebSocket, currPlayer: string, data: any) => {
 
   const opponent = currPlayer === "A" ? playerB : playerA;
   if (!playerA || !playerB) {
-    opponent?.send(
+    (currPlayer === "A" ? playerA : playerB)?.send(
       JSON.stringify({ message: "Waiting for the opponent player!" })
     );
     return;

@@ -15,6 +15,8 @@ const Board = () => {
 
   const socket = useRef<WebSocket | null>(null);
   const [player, setPlayer] = useState<string>(""); // can be "B" or "Spectator"
+  const [turn, setTurn] = useState("");
+  const [opponentPresent, setOpponentPresent] = useState(false);
   const [isH2, setIsH2] = useState(false);
 
   const [board, setBoard] = useState(initialBoard);
@@ -33,14 +35,21 @@ const Board = () => {
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
 
-      if (data.player) return setPlayer(data.player);
+      if (data.player) {
+        setTurn("A");
+        if (data.player === "B") setOpponentPresent(true);
+        return setPlayer((currPlayer) => currPlayer || data.player);
+      }
 
       const message: string = data.message;
+
+      if (message.startsWith("Waiting")) return setOpponentPresent(false);
       if (message.startsWith("Invalid")) return alert(message);
 
-      const { currRow, currCol, row, col, character } = data;
+      const { currRow, currCol, row, col } = data;
       if (currRow == undefined || currCol == undefined) return;
 
+      setTurn((t) => (t === "A" ? "B" : "A"));
       setBoard((prevBoard) => {
         const newBoard = prevBoard.map((row) => [...row]);
         const character = newBoard[currRow][currCol];
@@ -61,7 +70,7 @@ const Board = () => {
   const handleClick = (row: number, col: number) => {
     const selectedItem = board[row][col];
 
-    if (selectedItem) {
+    if (selectedItem && opponentPresent && player === turn) {
       const selectedPlayer = selectedItem[0];
       if (player != selectedPlayer) return;
 
@@ -104,6 +113,7 @@ const Board = () => {
   };
 
   const handleMove = (e: React.MouseEvent) => {
+    if (!opponentPresent || player !== turn) return;
     const buttonClicked = e.target as HTMLButtonElement;
     const command = buttonClicked.innerText;
 
@@ -126,6 +136,7 @@ const Board = () => {
       })
     );
 
+    setTurn((t) => (t === "A" ? "B" : "A"));
     setBoard((prevBoard) => {
       const newBoard = prevBoard.map((row) => [...row]);
       newBoard[position[0]][position[1]] = "";
@@ -141,6 +152,12 @@ const Board = () => {
         {player === "A" && "Joined as Player A"}
         {player === "B" && "Joined as Player B"}
         {player === "Spectator" && "Joined as Spectator"}
+      </p>
+
+      <p className={styles.playerTurn}>
+        {!opponentPresent
+          ? "Waiting for opponent player"
+          : `${player === turn ? "Your's Turn" : "Opponent's Turn"}`}
       </p>
 
       <div className={styles.board}>
@@ -169,11 +186,13 @@ const Board = () => {
         ))}
       </div>
 
-      <div className={styles.selectedPlayer}>
-        {selectedCharacter
-          ? `Selected: ${selectedCharacter}`
-          : "Please select a character to move"}
-      </div>
+      {player === turn && opponentPresent && (
+        <div className={styles.selectedPlayer}>
+          {selectedCharacter
+            ? `Selected: ${selectedCharacter}`
+            : "Please select a character to move"}
+        </div>
+      )}
 
       {selectedCharacter && (
         <div className={styles.options}>
