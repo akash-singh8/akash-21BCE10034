@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import isValidMove from "@/utils/validate-move";
 import styles from "@/styles/board.module.scss";
 
@@ -13,11 +13,12 @@ const Board = () => {
     ["B-P1", "B-P2", "B-H1", "B-H2", "B-P3"],
   ];
 
-  const currPlayer: string = "A"; // can be "B" or "Spectator"
+  const socket = useRef<WebSocket | null>(null);
+  const [player, setPlayer] = useState<string>(""); // can be "B" or "Spectator"
   const [isH2, setIsH2] = useState(false);
 
   const [board, setBoard] = useState(initialBoard);
-  const [selectedPlayer, setSelectedPlayer] = useState("");
+  const [selectedCharacter, setSelectedCharacter] = useState("");
   const [position, setPosition] = useState([-1, -1]);
   const [possibleMoves, setPossibleMoves] = useState([
     false,
@@ -26,14 +27,45 @@ const Board = () => {
     false,
   ]);
 
+  useEffect(() => {
+    socket.current = new WebSocket("ws://localhost:8080");
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+
+      if (data.player) return setPlayer(data.player);
+
+      const message: string = data.message;
+      if (message.startsWith("Invalid")) return alert(message);
+
+      const { currRow, currCol, row, col, character } = data;
+      if (currRow == undefined || currCol == undefined) return;
+
+      setBoard((prevBoard) => {
+        const newBoard = prevBoard.map((row) => [...row]);
+        const character = newBoard[currRow][currCol];
+        newBoard[currRow][currCol] = "";
+        newBoard[row][col] = character;
+        return newBoard;
+      });
+    };
+
+    socket.current.addEventListener("message", handleMessage);
+
+    return () => {
+      socket.current?.removeEventListener("message", handleMessage);
+      socket.current?.close();
+    };
+  }, []);
+
   const handleClick = (row: number, col: number) => {
     const selectedItem = board[row][col];
 
     if (selectedItem) {
       const selectedPlayer = selectedItem[0];
-      if (currPlayer != selectedPlayer) return;
+      if (player != selectedPlayer) return;
 
-      setSelectedPlayer(selectedItem);
+      setSelectedCharacter(selectedItem);
       setPosition([row, col]);
 
       const character = selectedItem.split("-")[1];
@@ -68,7 +100,7 @@ const Board = () => {
     const buttonClicked = e.target as HTMLButtonElement;
     const command = buttonClicked.innerText;
 
-    const character = selectedPlayer.split("-")[1];
+    const character = selectedCharacter.split("-")[1];
     const { isValid, row, col } = isValidMove(
       character,
       command,
@@ -79,19 +111,28 @@ const Board = () => {
 
     if (!isValid) return;
 
-    const newBoard = board.map((row) => [...row]);
-    newBoard[position[0]][position[1]] = "";
-    newBoard[row][col] = selectedPlayer;
+    socket.current?.send(
+      JSON.stringify({
+        character: selectedCharacter,
+        command: command,
+      })
+    );
 
-    setBoard(newBoard);
-    setSelectedPlayer("");
+    setBoard((prevBoard) => {
+      const newBoard = prevBoard.map((row) => [...row]);
+      newBoard[position[0]][position[1]] = "";
+      newBoard[row][col] = selectedCharacter;
+      return newBoard;
+    });
+    setSelectedCharacter("");
   };
 
   return (
     <div className={styles.main}>
       <p className={styles.currentPlayer}>
-        {/* add title for spectator */}
-        {currPlayer === "A" ? "Your's turn" : "Opponent's turn"}
+        {player === "A" && "Joined as Player A"}
+        {player === "B" && "Joined as Player B"}
+        {player === "Spectator" && "Joined as Spectator"}
       </p>
 
       <div className={styles.board}>
@@ -100,18 +141,18 @@ const Board = () => {
             {row.map((item, j) => (
               <div
                 key={`${i}-${j}`}
+                onClick={() => handleClick(i, j)}
                 className={`${styles.item} ${
                   item &&
-                  (currPlayer === "A" && item.startsWith("A")
+                  (player === "A" && item.startsWith("A")
                     ? styles.fillA
                     : styles.fillB)
                 } ${
                   item &&
-                  (currPlayer === "B" && item.startsWith("B")
+                  (player === "B" && item.startsWith("B")
                     ? styles.fillA
                     : styles.fillB)
-                } ${item && item == selectedPlayer && styles.current}`}
-                onClick={() => handleClick(i, j)}
+                } ${item && item == selectedCharacter && styles.current}`}
               >
                 {item}
               </div>
@@ -121,12 +162,12 @@ const Board = () => {
       </div>
 
       <div className={styles.selectedPlayer}>
-        {selectedPlayer
-          ? `Selected: ${selectedPlayer}`
+        {selectedCharacter
+          ? `Selected: ${selectedCharacter}`
           : "Please select a character to move"}
       </div>
 
-      {selectedPlayer && (
+      {selectedCharacter && (
         <div className={styles.options}>
           <button onClick={handleMove} disabled={!possibleMoves[0]}>
             {isH2 ? "FL" : "F"}

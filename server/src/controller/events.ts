@@ -8,6 +8,8 @@ const spectators: WebSocket[] = [];
 export const wsConnectionHandler = (ws: WebSocket) => {
   const currPlayer = playerA ? (playerB ? "Spectator" : "B") : "A";
 
+  ws.send(JSON.stringify({ player: currPlayer }));
+
   // todo: reconnect the player to the game on come back
 
   if (!playerA) playerA = ws;

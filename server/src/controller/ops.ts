@@ -44,6 +44,8 @@ const moveCharacter = (character: string, command: string) => {
 
   const [destRow, destCol] = getNewPosition(character, command);
   const response = {
+    currRow: currPos.row,
+    currCol: currPos.col,
     row: destRow,
     col: destCol,
     message: "Invalid Move",
