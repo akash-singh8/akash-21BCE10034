@@ -1,4 +1,4 @@
-import { board, characterPositions } from "./game";
+import { board, characterPositions, characterKilled } from "./game";
 
 const getNewPosition = (character: string, command: string) => {
   let destRow = characterPositions[character].row;
@@ -46,6 +46,7 @@ const moveCharacter = (character: string, command: string) => {
   const response = {
     board,
     message: "Invalid Move",
+    winner: "",
   };
 
   // Check if the new position is within the board boundaries
@@ -55,10 +56,18 @@ const moveCharacter = (character: string, command: string) => {
 
   // Handle character's collision
   if (destCharacter) {
-    if (destCharacter[0] === player) {
+    const destPlayer = destCharacter[0];
+    if (destPlayer === player) {
       response.message = "Invalid Move - Character already exist!";
       return response;
-    } else response.message = "Killed";
+    } else {
+      response.message = "Killed";
+      if (destPlayer === "A") characterKilled.A += 1;
+      else characterKilled.B += 1;
+
+      if (characterKilled.A == 5) response.winner = "B";
+      if (characterKilled.B == 5) response.winner = "A";
+    }
   } else response.message = "Moved";
 
   // Update the board and character positions

@@ -22,8 +22,7 @@ export const wsConnectionHandler = (ws: WebSocket) => {
   ws.on("message", (message) => {
     try {
       const data = JSON.parse(message.toString());
-      // todo : add validation check for the data
-      //   if (!data.character || !data.command) throw new Error("Invalid input!");
+      if (!data.character || !data.command) throw new Error("Invalid input!");
 
       handleMessage(ws, currPlayer, data);
     } catch (err) {
@@ -57,17 +56,22 @@ const handleMessage = (ws: WebSocket, currPlayer: string, data: any) => {
 
   const response = moveCharacter(data.character, data.command);
 
+  // @ts-ignore
+  const isWinner = response.winner;
+  if (isWinner)
+    (currPlayer === "A" ? playerA : playerB)?.send(JSON.stringify(response));
+
   opponent?.send(JSON.stringify(response));
 
   spectators.forEach((spec) => {
     spec.send(JSON.stringify(response));
   });
+
+  if (isWinner) resetGame();
 };
 
 // handleClose:  Notify the opponent player and spectators
 const handleClose = (currPlayer: string, ws: WebSocket) => {
-  // todo: reset the game if both players are disconnected
-
   const response = {
     message: `${currPlayer} Disconnected`,
   };

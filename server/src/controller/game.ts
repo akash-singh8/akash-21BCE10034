@@ -9,7 +9,14 @@ export const board: string[][] = [
   ["B-P1", "B-P2", "B-H1", "B-H2", "B-P3"],
 ];
 
+export const characterKilled = {
+  A: 0,
+  B: 0,
+};
+
 export const resetGame = () => {
+  characterKilled.A = 0;
+  characterKilled.B = 0;
   board[0] = ["A-P1", "A-P2", "A-H1", "A-H2", "A-P3"];
   board[1] = ["", "", "", "", ""];
   board[2] = ["", "", "", "", ""];
