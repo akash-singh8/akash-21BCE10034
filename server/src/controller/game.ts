@@ -9,6 +9,14 @@ export const board: string[][] = [
   ["B-P1", "B-P2", "B-H1", "B-H2", "B-P3"],
 ];
 
+export const resetGame = () => {
+  board[0] = ["A-P1", "A-P2", "A-H1", "A-H2", "A-P3"];
+  board[1] = ["", "", "", "", ""];
+  board[2] = ["", "", "", "", ""];
+  board[3] = ["", "", "", "", ""];
+  board[4] = ["B-P1", "B-P2", "B-H1", "B-H2", "B-P3"];
+};
+
 type positionType = {
   [key: string]: {
     row: number;

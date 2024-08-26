@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import { moveCharacter } from "./ops";
+import { board, resetGame } from "./game";
 
 let playerA: WebSocket | null = null;
 let playerB: WebSocket | null = null;
@@ -8,8 +9,9 @@ const spectators: WebSocket[] = [];
 export const wsConnectionHandler = (ws: WebSocket) => {
   const currPlayer = playerA ? (playerB ? "Spectator" : "B") : "A";
 
-  ws.send(JSON.stringify({ player: currPlayer }));
-  if (currPlayer === "B") playerA?.send(JSON.stringify({ player: currPlayer }));
+  const initResponse = JSON.stringify({ player: currPlayer, board });
+  ws.send(initResponse);
+  if (currPlayer === "B") playerA?.send(initResponse);
 
   // todo: reconnect the player to the game on come back
 
@@ -76,6 +78,9 @@ const handleClose = (currPlayer: string, ws: WebSocket) => {
     const index = spectators.indexOf(ws);
     if (index !== -1) spectators.splice(index, 1);
   }
+
+  // Reset the game if both player left
+  if (!playerA && !playerB) resetGame();
 
   if (currPlayer !== "Spectator") {
     const opponent = currPlayer === "A" ? playerB : playerA;

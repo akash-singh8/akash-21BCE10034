@@ -36,6 +36,7 @@ const Board = () => {
       const data = JSON.parse(event.data);
 
       if (data.player) {
+        setBoard(data.board);
         setTurn("A");
         if (data.player === "B") setOpponentPresent(true);
         return setPlayer((currPlayer) => currPlayer || data.player);
@@ -46,17 +47,11 @@ const Board = () => {
       if (message.startsWith("Waiting")) return setOpponentPresent(false);
       if (message.startsWith("Invalid")) return alert(message);
 
-      const { currRow, currCol, row, col } = data;
-      if (currRow == undefined || currCol == undefined) return;
+      const { board } = data;
+      if (board === undefined) return;
 
       setTurn((t) => (t === "A" ? "B" : "A"));
-      setBoard((prevBoard) => {
-        const newBoard = prevBoard.map((row) => [...row]);
-        const character = newBoard[currRow][currCol];
-        newBoard[currRow][currCol] = "";
-        newBoard[row][col] = character;
-        return newBoard;
-      });
+      setBoard(board);
     };
 
     socket.current.addEventListener("message", handleMessage);
@@ -155,7 +150,9 @@ const Board = () => {
       </p>
 
       <p className={styles.playerTurn}>
-        {!opponentPresent
+        {player === "Spectator"
+          ? `${turn}'s Turn`
+          : !opponentPresent
           ? "Waiting for opponent player"
           : `${player === turn ? "Your's Turn" : "Opponent's Turn"}`}
       </p>
