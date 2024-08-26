@@ -19,8 +19,11 @@ const isValidMove = (
     else [row, col] = [row + 2, col + 2];
   }
 
-  if (row < 0 || row > 4 || col < 0 || col > 4 || board[row][col]) return false;
-  return true;
+  return {
+    isValid: !(row < 0 || row > 4 || col < 0 || col > 4 || board[row][col]),
+    row,
+    col,
+  };
 };
 
 export default isValidMove;

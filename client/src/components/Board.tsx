@@ -18,6 +18,7 @@ const Board = () => {
 
   const [board, setBoard] = useState(initialBoard);
   const [selectedPlayer, setSelectedPlayer] = useState("");
+  const [position, setPosition] = useState([-1, -1]);
   const [possibleMoves, setPossibleMoves] = useState([
     false,
     false,
@@ -33,13 +34,16 @@ const Board = () => {
       if (currPlayer != selectedPlayer) return;
 
       setSelectedPlayer(selectedItem);
+      setPosition([row, col]);
 
       const character = selectedItem.split("-")[1];
       const cPossibleMoves = [false, false, false, false];
       // 0th value represent Forward, 1->Backward, 2->Left, 3->right
 
       const validMove = (command: string) => {
-        return isValidMove(character, command, row, col, board);
+        const { isValid } = isValidMove(character, command, row, col, board);
+
+        return isValid;
       };
 
       if (character.startsWith("P") || character === "H1") {
@@ -58,6 +62,29 @@ const Board = () => {
 
       setPossibleMoves(cPossibleMoves);
     }
+  };
+
+  const handleMove = (e: React.MouseEvent) => {
+    const buttonClicked = e.target as HTMLButtonElement;
+    const command = buttonClicked.innerText;
+
+    const character = selectedPlayer.split("-")[1];
+    const { isValid, row, col } = isValidMove(
+      character,
+      command,
+      position[0],
+      position[1],
+      board
+    );
+
+    if (!isValid) return;
+
+    const newBoard = board.map((row) => [...row]);
+    newBoard[position[0]][position[1]] = "";
+    newBoard[row][col] = selectedPlayer;
+
+    setBoard(newBoard);
+    setSelectedPlayer("");
   };
 
   return (
@@ -101,10 +128,18 @@ const Board = () => {
 
       {selectedPlayer && (
         <div className={styles.options}>
-          <button disabled={!possibleMoves[0]}>{isH2 ? "FL" : "F"}</button>
-          <button disabled={!possibleMoves[1]}>{isH2 ? "FR" : "B"}</button>
-          <button disabled={!possibleMoves[2]}>{isH2 ? "BL" : "L"}</button>
-          <button disabled={!possibleMoves[3]}>{isH2 ? "BR" : "R"}</button>
+          <button onClick={handleMove} disabled={!possibleMoves[0]}>
+            {isH2 ? "FL" : "F"}
+          </button>
+          <button onClick={handleMove} disabled={!possibleMoves[1]}>
+            {isH2 ? "FR" : "B"}
+          </button>
+          <button onClick={handleMove} disabled={!possibleMoves[2]}>
+            {isH2 ? "BL" : "L"}
+          </button>
+          <button onClick={handleMove} disabled={!possibleMoves[3]}>
+            {isH2 ? "BR" : "R"}
+          </button>
         </div>
       )}
     </div>
