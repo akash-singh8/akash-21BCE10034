@@ -1,0 +1,72 @@
+.container {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+}
+
+.popup {
+  background: rgba(var(--background-rgb));
+  border-radius: 12px;
+  padding: 1.5rem 1.5rem;
+  width: 440px;
+  height: 248px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 8rem;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 24px;
+  text-align: center;
+}
+
+.popup p {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.options {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  column-gap: 12px;
+  justify-content: center;
+
+  button {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--secondary-text);
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+
+    &:first-child {
+      color: #86343b;
+      border: 1px solid #86343b;
+      background-color: transparent;
+    }
+
+    &:last-child {
+      background-color: #33353d;
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:active {
+      opacity: 1;
+    }
+  }
+}

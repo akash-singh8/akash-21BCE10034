@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import isValidMove from "@/utils/validate-move";
 import styles from "@/styles/board.module.scss";
+import Popup from "./Popup";
 
 const Board = () => {
   const initialBoard = [
@@ -29,6 +30,9 @@ const Board = () => {
     false,
   ]);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [winner, setWinner] = useState("");
+
   useEffect(() => {
     socket.current = new WebSocket("ws://localhost:8080");
 
@@ -52,6 +56,13 @@ const Board = () => {
 
       setTurn((t) => (t === "A" ? "B" : "A"));
       setBoard(board);
+
+      setTimeout(() => {
+        if (data.winner) {
+          setWinner(data.winner);
+          setShowPopup(true);
+        }
+      }, 500);
     };
 
     socket.current.addEventListener("message", handleMessage);
@@ -142,72 +153,81 @@ const Board = () => {
   };
 
   return (
-    <div className={styles.main}>
-      <p className={styles.currentPlayer}>
-        {player === "A" && "Joined as Player A"}
-        {player === "B" && "Joined as Player B"}
-        {player === "Spectator" && "Joined as Spectator"}
-      </p>
+    <>
+      {showPopup && (
+        <Popup
+          won={player === winner}
+          spectator={player === "Spectator" ? `Player ${winner} won!` : ""}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
+      <div className={styles.main}>
+        <p className={styles.currentPlayer}>
+          {player === "A" && "Joined as Player A"}
+          {player === "B" && "Joined as Player B"}
+          {player === "Spectator" && "Joined as Spectator"}
+        </p>
 
-      <p className={styles.playerTurn}>
-        {player === "Spectator"
-          ? `${turn}'s Turn`
-          : !opponentPresent
-          ? "Waiting for opponent player"
-          : `${player === turn ? "Your's Turn" : "Opponent's Turn"}`}
-      </p>
+        <p className={styles.playerTurn}>
+          {player === "Spectator"
+            ? `${turn}'s Turn`
+            : !opponentPresent
+            ? "Waiting for opponent player"
+            : `${player === turn ? "Your's Turn" : "Opponent's Turn"}`}
+        </p>
 
-      <div className={styles.board}>
-        {board.map((row, i) => (
-          <div key={i} className={styles.row}>
-            {row.map((item, j) => (
-              <div
-                key={`${i}-${j}`}
-                onClick={() => handleClick(i, j)}
-                className={`${styles.item} ${
-                  item &&
-                  (player === "A" && item.startsWith("A")
-                    ? styles.fillA
-                    : styles.fillB)
-                } ${
-                  item &&
-                  (player === "B" && item.startsWith("B")
-                    ? styles.fillA
-                    : styles.fillB)
-                } ${item && item == selectedCharacter && styles.current}`}
-              >
-                {item}
-              </div>
-            ))}
+        <div className={styles.board}>
+          {board.map((row, i) => (
+            <div key={i} className={styles.row}>
+              {row.map((item, j) => (
+                <div
+                  key={`${i}-${j}`}
+                  onClick={() => handleClick(i, j)}
+                  className={`${styles.item} ${
+                    item &&
+                    (player === "A" && item.startsWith("A")
+                      ? styles.fillA
+                      : styles.fillB)
+                  } ${
+                    item &&
+                    (player === "B" && item.startsWith("B")
+                      ? styles.fillA
+                      : styles.fillB)
+                  } ${item && item == selectedCharacter && styles.current}`}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {player === turn && opponentPresent && (
+          <div className={styles.selectedPlayer}>
+            {selectedCharacter
+              ? `Selected: ${selectedCharacter}`
+              : "Please select a character to move"}
           </div>
-        ))}
+        )}
+
+        {selectedCharacter && (
+          <div className={styles.options}>
+            <button onClick={handleMove} disabled={!possibleMoves[0]}>
+              {isH2 ? "FL" : "F"}
+            </button>
+            <button onClick={handleMove} disabled={!possibleMoves[1]}>
+              {isH2 ? "FR" : "B"}
+            </button>
+            <button onClick={handleMove} disabled={!possibleMoves[2]}>
+              {isH2 ? "BL" : "L"}
+            </button>
+            <button onClick={handleMove} disabled={!possibleMoves[3]}>
+              {isH2 ? "BR" : "R"}
+            </button>
+          </div>
+        )}
       </div>
-
-      {player === turn && opponentPresent && (
-        <div className={styles.selectedPlayer}>
-          {selectedCharacter
-            ? `Selected: ${selectedCharacter}`
-            : "Please select a character to move"}
-        </div>
-      )}
-
-      {selectedCharacter && (
-        <div className={styles.options}>
-          <button onClick={handleMove} disabled={!possibleMoves[0]}>
-            {isH2 ? "FL" : "F"}
-          </button>
-          <button onClick={handleMove} disabled={!possibleMoves[1]}>
-            {isH2 ? "FR" : "B"}
-          </button>
-          <button onClick={handleMove} disabled={!possibleMoves[2]}>
-            {isH2 ? "BL" : "L"}
-          </button>
-          <button onClick={handleMove} disabled={!possibleMoves[3]}>
-            {isH2 ? "BR" : "R"}
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
