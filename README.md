@@ -10,6 +10,7 @@ Multiplayer realtime turn-based Chess like Game
   - [Running the Backend](#running-the-backend)
   - [Running the Frontend](#running-the-frontend)
 - [Usage](#usage)
+- [Screenshots](#screenshots)
 
 ## Prerequisites
 
@@ -54,5 +55,13 @@ npm run dev
 
 - Visit `http://localhost:3000` to access the frontend.
 - The backend websocket api is available at `ws://localhost:8080`
+
+### Screenshots
+
+![image](https://github.com/user-attachments/assets/d351a62e-5e0b-4167-bef4-998b27f7957d)
+![image](https://github.com/user-attachments/assets/5ec16618-db15-44cd-bcf5-8414feca8407)
+![image](https://github.com/user-attachments/assets/9fe8f740-2c68-4403-9459-092701a58133)
+
+
 
 ### Thank you very much
